@@ -99,8 +99,9 @@ class qtype_multianswerwiris_shortanswer_helper_question extends qtype_shortansw
  * subquestions. Replaces the qtype_multianswer_textfield_renderer class.
  */
 class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer_subq_renderer_base {
-    public function subquestion(question_attempt $qa, question_display_options $options,
-            $index, question_graded_automatically $subq) {
+    public function subquestion(question_attempt $qa, 
+                                question_display_options $options, 
+                                $index, question_graded_automatically $subq) {
 
         $fieldprefix = 'sub' . $index . '_';
         $fieldname = $fieldprefix . 'answer';
@@ -165,8 +166,7 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
 
         $feedbackpopup = parent::feedback_popup($subq, $matchinganswer->fraction,
                 $subq->format_text($matchinganswer->feedback, $matchinganswer->feedbackformat,
-                        $qa, 'question', 'answerfeedback', $matchinganswer->id),
-                s($correctanswer->answer), $options);
+                        $qa, 'question', 'answerfeedback', $matchinganswer->id), s($correctanswer->answer), $options);
 
         $output = html_writer::start_tag('span', array('class' => 'subquestion'));
         $output .= html_writer::tag('label', get_string('answer'),
