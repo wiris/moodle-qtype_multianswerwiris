@@ -28,7 +28,7 @@ class qtype_multianswerwiris_edit_form extends qtype_wq_edit_form {
 
         $class = 'wirisauthoringfield wirisstudio wirismultichoice wirisvariables wirisvalidation wirisauxiliarcas ';
         $class .= 'wirisanswerfieldpopupeditor wirisanswerfieldplaintext';
-        $wirismultianswer = $mform->createElement('text', 'wirismultianswer', 
+        $wirismultianswer = $mform->createElement('text', 'wirismultianswer',
                 get_string('multianswerwiris_algorithm', 'qtype_multianswerwiris'), array('class' => $class));
 
         $wirishdr = $mform->createElement('header', 'wirishdr',

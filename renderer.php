@@ -99,8 +99,8 @@ class qtype_multianswerwiris_shortanswer_helper_question extends qtype_shortansw
  * subquestions. Replaces the qtype_multianswer_textfield_renderer class.
  */
 class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer_subq_renderer_base {
-    public function subquestion(question_attempt $qa, 
-                                question_display_options $options, 
+    public function subquestion(question_attempt $qa,
+                                question_display_options $options,
                                 $index, question_graded_automatically $subq) {
 
         $fieldprefix = 'sub' . $index . '_';
