@@ -219,6 +219,11 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
 
     public function clear_wrong_from_response(array $response) {
         $this->set_shortanswer_matching_answers($response);
+        // Clean "_sqi" index from clean response:
+        // Is not necessary and, in some scenarios, (multiple tries for example) the sqi variable is scaped twice.
+        if (array_key_exists("_sqi", $response)) {
+            unset($response["_sqi"]);
+        }
         // Use wiris subquestion types in base question.
         $basesubquestions = $this->base->subquestions;
         $this->base->subquestions = $this->subquestions;
