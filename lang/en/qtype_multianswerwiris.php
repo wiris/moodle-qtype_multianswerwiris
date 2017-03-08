@@ -28,3 +28,4 @@ $string['pluginname_help'] = 'Like the standard Embedded answers (Cloze) questio
 $string['pluginnamesummary'] = 'Like the standard Embedded answers (Cloze) question, but you can deliver different question text by inserting random numbers, formulas or plots. The feedback can also use the random values.';
 $string['pluginnameadding'] = 'Adding a Embedded answers (Cloze) - math & science question by WIRIS';
 $string['pluginnameediting'] = 'Editing a Embedded answers (Cloze) - math & science question by WIRIS';
+$string['contentnotviewable'] = 'The content can not be displayed.';

@@ -28,3 +28,4 @@ $string['pluginname_help'] = 'Wie bei der standardmäßigen Lückentext-Frage (C
 $string['pluginnamesummary'] = 'Wie bei der standardmäßigen Lückentext-Frage (Cloze). Allerdings können Sie verschiedene Fragetexte durch Einfügen von zufälligen Zahlen, Formeln oder grafischen Darstellungen erstellen. Die zufälligen Werte können auch für das Feedback verwendet werden.';
 $string['pluginnameadding'] = 'Lückentext-Frage hinzufügen (Cloze) – Mathematik und Naturwissenschaften von WIRIS';
 $string['pluginnameediting'] = 'Lückentext-Frage bearbeiten (Cloze) – Mathematik und Naturwissenschaften von WIRIS';
+$string['contentnotviewable'] = 'Der Inhalt kann nicht angezeigt werden.';

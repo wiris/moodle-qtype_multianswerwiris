@@ -28,3 +28,4 @@ $string['pluginname_help'] = 'Semblable à la question standard à réponses int
 $string['pluginnamesummary'] = 'Semblable à la question standard à réponses intégrées (Cloze), avec la possibilité de poser une question avec des nombres, des formules ou des courbes aléatoires. Les commentaires peuvent également utiliser les valeurs aléatoires.';
 $string['pluginnameadding'] = 'Ajout de réponses intégrées (Cloze) - Question de maths et sciences par WIRIS';
 $string['pluginnameediting'] = 'Modification de réponses intégrées (Cloze) - Question de maths et sciences par WIRIS';
+$string['contentnotviewable'] = 'Impossible d\'afficher le contenu.';

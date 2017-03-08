@@ -285,4 +285,11 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
         return $result;
     }
 
+    public function summarise_response(array $response) {
+        // This function must return plain text output. Since student response
+        // may be mathml and the conversion MathML => text made in
+        // expand_variables_text() is not good, we prevent to show incorrect
+        // data.
+        return get_string('contentnotviewable', 'qtype_multianswerwiris');
+    }
 }
