@@ -125,15 +125,34 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
 
         // Work out a good input field size.
         // Moodle 2.6 and upwards.
+        $size = 1;
         if (class_exists('core_text')) {
-            $size = max(1, core_text::strlen(trim($response)) + 1);
-            foreach ($subq->answers as $ans) {
-                $size = max($size, core_text::strlen(trim($ans->answer)));
+            if ($response != null) {
+                //  Plain response, the size of the input is the same that the size of the response.
+                if (substr($response, 0, 5) != "<math"){
+                    $size = max(1, core_text::strlen(trim($response)) + 1);
+                } else {
+                    $size = $qa->get_question()->expand_variables_text($response) +1;
+
+                }
+            } else {
+                foreach ($subq->answers as $ans) {
+                    $size = max($size, core_text::strlen(trim($ans->answer)));
+                }
             }
         } else {
-            $size = max(1, textlib::strlen(trim($response)) + 1);
-            foreach ($subq->answers as $ans) {
-                $size = max($size, textlib::strlen(trim($ans->answer)));
+            if ($response != null) {
+                //  Plain response, the size of the input is the same that the size of the response.
+                if (substr($response, 0, 5) != "<math"){
+                    $size = max(1, textlib::strlen(trim($response)) + 1);
+                } else {
+                    $size = $qa->get_question()->expand_variables_text($response) +1;
+
+                }
+            } else {
+                foreach ($subq->answers as $ans) {
+                    $size = max($size, textlib::strlen(trim($ans->answer)));
+                }
             }
         }
         $size = min(60, round($size + rand(0, $size * 0.15)));
