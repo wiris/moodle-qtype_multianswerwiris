@@ -184,6 +184,9 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                         $maxgrade = $grade;
                         $matching = $answer;
                     }
+                    if (!isset($matching) && $subquestion->compare_response_with_answer($subresp, $answer)) {
+                        $matching = $answer;
+                    }
                     $numsubans++;
                 }
                 $matchinganswerid = 0;
