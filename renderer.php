@@ -128,11 +128,11 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
         $size = 1;
         if (class_exists('core_text')) {
             if ($response != null) {
-                //  Plain response, the size of the input is the same that the size of the response.
-                if (substr($response, 0, 5) != "<math"){
+                // Plain response, the size of the input is the same that the size of the response.
+                if (substr($response, 0, 5) != "<math") {
                     $size = max(1, core_text::strlen(trim($response)) + 1);
                 } else {
-                    $size = $qa->get_question()->expand_variables_text($response) +1;
+                    $size = $qa->get_question()->expand_variables_text($response) + 1;
 
                 }
             } else {
@@ -142,11 +142,11 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
             }
         } else {
             if ($response != null) {
-                //  Plain response, the size of the input is the same that the size of the response.
-                if (substr($response, 0, 5) != "<math"){
+                // Plain response, the size of the input is the same that the size of the response.
+                if (substr($response, 0, 5) != "<math") {
                     $size = max(1, textlib::strlen(trim($response)) + 1);
                 } else {
-                    $size = $qa->get_question()->expand_variables_text($response) +1;
+                    $size = $qa->get_question()->expand_variables_text($response) + 1;
 
                 }
             } else {
