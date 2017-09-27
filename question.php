@@ -88,19 +88,24 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
             }
             // Build list of shortanswerwiris subquestions.
             $indexes = array();
+            $needsgrade = false;
             foreach ($this->subquestions as $i => $subquestion) {
                 if ($subquestion->get_type_name() == 'shortanswerwiris') {
-                    $substep = $this->get_substep(null, $i);
-                    $subresp = $substep->filter_array($response);
-                    $subresphash = isset($subresp['answer']) ? md5($subresp['answer']) : null;
-                    if (!is_null($subresphash) && ($subresphash != $subquestion->step->get_var('_response_hash'))) {
-                        $indexes[] = $i;
+                    $indexes[] = $i;
+                    if (!$needsgrade) {
+                        $substep = $this->get_substep(null, $i);
+                        $subresp = $substep->filter_array($response);
+                        $subresphash = isset($subresp['answer']) ? md5($subresp['answer']) : null;
+                        if (!is_null($subresphash) && ($subresphash != $subquestion->step->get_var('_response_hash'))) {
+                            $needsgrade = true;
+                        }
                     }
+                    
                 }
             }
 
             // Quick return if nothing to do.
-            if (empty($indexes)) {
+            if (!$needsgrade) {
                 return;
             }
 
@@ -118,7 +123,8 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
             if (empty($qimpl->assertions)) {
                 $qimpl->setAssertion("equivalent_symbolic", 0, 0);
             }
-
+            
+            // Remove all non-syntactic assertions from question and save to $assertions array.
             for ($i = $qimpl->assertions->length - 1; $i >= 0; $i--) {
                 $assertion = $qimpl->assertions[$i];
                 if (!$assertion->isSyntactic()) {
@@ -128,7 +134,7 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
             }
             $wrap->stop();
 
-            // Build request objects.
+            // Build request object.
             $studentanswers = array();
             $teacheranswers = array();
 
@@ -201,9 +207,11 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                 $subresphash = md5($subresp['answer']);
                 $subquestion->step->set_var('_response_hash', $subresphash, true);
                 $subquestion->step->set_var('_matching_answer', $matchinganswerid, true);
-                $this->step->set_var('_qi', $qi->serialize(), true);
                 $numsubq++;
             }
+            // Update question instance.
+            $xml = $qi->serialize();
+            $this->step->set_var('_qi', $xml, true);
             $this->step->reset_attempts();
         } catch (moodle_exception $e) {
             // Notify of the error.
