@@ -100,7 +100,6 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                             $needsgrade = true;
                         }
                     }
-                    
                 }
             }
 
@@ -123,7 +122,7 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
             if (empty($qimpl->assertions)) {
                 $qimpl->setAssertion("equivalent_symbolic", 0, 0);
             }
-            
+
             // Remove all non-syntactic assertions from question and save to $assertions array.
             for ($i = $qimpl->assertions->length - 1; $i >= 0; $i--) {
                 $assertion = $qimpl->assertions[$i];
