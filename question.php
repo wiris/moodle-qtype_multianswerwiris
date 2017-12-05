@@ -77,6 +77,14 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
         parent::apply_attempt_state($step);
         $this->set_wirisquestioninstance();
         $this->load_step($step);
+        foreach ($this->subquestions as $subquestion) {
+            if ($subquestion->get_type_name() == 'shortanswerwiris') {
+                // This is a regrade because is the only case where this function is
+                // called with the first step instead of start_attempt. So invalidate
+                // cached matching answers.
+                $subquestion->step->set_var('_response_hash', '0');
+            }
+        }
     }
 
     private function set_shortanswer_matching_answers(array $response) {
@@ -204,7 +212,10 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                 $substep = $this->get_substep(null, $i);
                 $subresp = $substep->filter_array($response);
                 $subresphash = md5($subresp['answer']);
-                $subquestion->step->set_var('_response_hash', $subresphash, true);
+                // This is a regrade because is the only case where this function is
+                // called with the first step instead of start_attempt. So invalidate
+                // cached matching answers.
+                $subquestion->step->set_var('_response_hash', '0');
                 $subquestion->step->set_var('_matching_answer', $matchinganswerid, true);
                 $numsubq++;
             }
