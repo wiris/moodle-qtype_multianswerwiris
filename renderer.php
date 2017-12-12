@@ -137,7 +137,7 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
                 }
             } else {
                 foreach ($subq->answers as $ans) {
-                    $size = max($size, core_text::strlen(trim($ans->answer)));
+                    $size = max($size, core_text::strlen(trim($qa->get_question()->expand_variables_text($ans->answer))));
                 }
             }
         } else {
@@ -151,7 +151,7 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
                 }
             } else {
                 foreach ($subq->answers as $ans) {
-                    $size = max($size, textlib::strlen(trim($ans->answer)));
+                    $size = max($size, textlib::strlen(trim($qa->get_question()->expand_variables_text($ans->answer))));
                 }
             }
         }
