@@ -82,7 +82,9 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                 // This is a regrade because is the only case where this function is
                 // called with the first step instead of start_attempt. So invalidate
                 // cached matching answers.
-                $subquestion->step->set_var('_response_hash', '0');
+                if ($subquestion->step->is_first_step()) {
+                    $subquestion->step->set_var('_response_hash', '0');
+                }
             }
         }
     }
@@ -212,10 +214,7 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                 $substep = $this->get_substep(null, $i);
                 $subresp = $substep->filter_array($response);
                 $subresphash = md5($subresp['answer']);
-                // This is a regrade because is the only case where this function is
-                // called with the first step instead of start_attempt. So invalidate
-                // cached matching answers.
-                $subquestion->step->set_var('_response_hash', '0');
+                $subquestion->step->set_var('_response_hash', $subresphash, true);
                 $subquestion->step->set_var('_matching_answer', $matchinganswerid, true);
                 $numsubq++;
             }
