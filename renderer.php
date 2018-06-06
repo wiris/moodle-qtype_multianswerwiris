@@ -168,7 +168,6 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
             'class' => 'wirisanswerfield wirisembedded wiriscopystyle',
         );
         if ($options->readonly) {
-            $inputattributes['class'] .= ' wirisreadonly';
             $inputattributes['readonly'] = 'readonly';
         }
 
