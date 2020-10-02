@@ -118,7 +118,7 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                 return;
             }
 
-            $builder = com_wiris_quizzes_api_QuizzesBuilder::getInstance();
+            $builder = com_wiris_quizzes_api_Quizzes::getInstance();
             $wrap = com_wiris_system_CallWrapper::getInstance();
             $q = $this->wirisquestion;
 
@@ -180,7 +180,7 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
             for ($i = 0; $i < count($teacheranswers); $i++) {
                 $q->setCorrectAnswer($i, $teacheranswers[$i]);
             }
-            $request = $builder->newFeedbackRequest($this->join_feedback_text(), $q, $qi);
+            $request = $builder->newFeedbackRequest($this->join_feedback_text(), $qi);
             $resp = $this->call_wiris_service($request);
             $qi->update($resp);
 
