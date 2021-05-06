@@ -133,6 +133,14 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                 $qimpl->setAssertion("equivalent_symbolic", 0, 0);
             }
 
+            // Since we are generating all the slots artificially by cloning the first one,
+            // set its answer field type as the default for the question.
+            $slots = $qimpl->slots;
+            if ($slots != null && isset($slots[0])) {
+                $answerFieldType = $slots[0]->getAnswerFieldType();
+                $qimpl->setAnswerFieldType($answerFieldType);
+            }
+
             // Remove all non-syntactic assertions from question and save to $assertions array.
             for ($i = $qimpl->assertions->length - 1; $i >= 0; $i--) {
                 $assertion = $qimpl->assertions[$i];
