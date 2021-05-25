@@ -25,14 +25,6 @@ class qtype_multianswerwiris extends qtype_wq {
         parent::__construct(new qtype_multianswer());
     }
 
-    // public function save_question_options($question) {
-    //     global $DB;
-
-    //     // We don't delete old subquestions because it cause
-    //     // a new ids on BD that throw error on regrade.
-    //     parent::save_question_options($question);
-    // }
-
     public function save_question_options($question) {
         global $DB;
 
