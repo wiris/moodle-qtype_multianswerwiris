@@ -35,8 +35,8 @@ Feature: Test creating a Multianswer Wiris (Cloze) question
     And I click on "//*[@id='id_submitbutton']" "xpath_element"
     Then I should see "multianswer-wiris-001" in the "categoryquestions" "table"
 
-   @javascript
-   Scenario: Create a broken Cloze question and correct it
+  @javascript
+  Scenario: Create a broken Cloze question and correct it
     When I click on "Create a new question ..." "button"
     And I choose the question type "Cloze - science"
     And I set the field "Question name" to "multianswer-wiris-002"
