@@ -138,7 +138,7 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
             $slots = $qimpl->slots;
             if ($slots != null && isset($slots[0])) {
                 $answerfieldtype = $slots[0]->getAnswerFieldType();
-                $qimpl->setAnswerFieldType($answerfieldype);
+                $qimpl->setAnswerFieldType($answerfieldtype);
             }
 
             // Remove all non-syntactic assertions from question and save to $assertions array.
