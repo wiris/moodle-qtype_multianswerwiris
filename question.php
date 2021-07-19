@@ -118,7 +118,7 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                 return;
             }
 
-            $builder = com_wiris_quizzes_api_QuizzesBuilder::getInstance();
+            $builder = com_wiris_quizzes_api_Quizzes::getInstance();
             $wrap = com_wiris_system_CallWrapper::getInstance();
             $q = $this->wirisquestion;
 
@@ -131,6 +131,14 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
             // multianswer assertions don't have assertions array.
             if (empty($qimpl->assertions)) {
                 $qimpl->setAssertion("equivalent_symbolic", 0, 0);
+            }
+
+            // Since we are generating all the slots artificially by cloning the first one,
+            // set its answer field type as the default for the question.
+            $slots = $qimpl->slots;
+            if ($slots != null && isset($slots[0])) {
+                $answerfieldtype = $slots[0]->getAnswerFieldType();
+                $qimpl->setAnswerFieldType($answerfieldtype);
             }
 
             // Remove all non-syntactic assertions from question and save to $assertions array.
@@ -180,7 +188,7 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
             for ($i = 0; $i < count($teacheranswers); $i++) {
                 $q->setCorrectAnswer($i, $teacheranswers[$i]);
             }
-            $request = $builder->newFeedbackRequest($this->join_feedback_text(), $q, $qi);
+            $request = $builder->newFeedbackRequest($this->join_feedback_text(), $qi);
             $resp = $this->call_wiris_service($request);
             $qi->update($resp);
 

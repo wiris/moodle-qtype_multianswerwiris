@@ -15,32 +15,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Privacy class for Wiris Quizzes Cloze question type.
+ * Behat qtype_multianswerwiris-related steps definitions.
  *
  * @package    qtype_multianswerwiris
- * @copyright  WIRIS Europe (Maths for more S.L)
+ * @category   test
+ * @copyright  2021 WIRIS Europe (Maths For More S.L.)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace qtype_multianswerwiris\privacy;
+/**
+ * Behat custom step definitions and partial named selectors for qtype_multianswerwiris.
+ *
+ * @package    qtype_multianswerwiris
+ * @category   test
+ * @copyright  2021 WIRIS Europe (Maths For More S.L.)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class behat_qtype_multianswerwiris extends behat_base {
 
-defined('MOODLE_INTERNAL') || die();
-
-class provider implements
-    // This plugin does not store any personal user data.
-    \core_privacy\local\metadata\null_provider
-{
-    use \core_privacy\local\legacy_polyfill;
-
-    /**
-     * Get the language string identifier with the component's language
-     * file to explain why this plugin stores no data.
-     *
-     * @return  string
-     */
-    // @codingStandardsIgnoreStart
-    public static function _get_reason() {
-        // @codingStandardsIgnoreEnd
-        return 'privacy:null_reason';
-    }
 }
