@@ -138,7 +138,7 @@ class qtype_multianswerwiris_test_helper extends question_test_helper {
         en</property><property name="precision">4</property><property name="quizzes_question_options">true</property>
         <property name="save_settings_in_cookies">false</property><property name="times_operator">·</property>
         <property name="use_degrees">false</property></properties><session version="3.0" lang="en"><task><title>
-        <math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>Sheet 1</mtext></math></title><group><command><input>
+        <math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>Sheet 1</mtext></math></title><group><command><input>
         <math xmlns="http://www.w3.org/1998/Math/MathML"><mi mathvariant="normal">a</mi><mo>=</mo><mo>-</mo><mn>10</mn></math>
         </input><output><math xmlns="http://www.w3.org/1998/Math/MathML"><mo>-</mo><mn>10</mn></math></output></command><command>
         <input><math xmlns="http://www.w3.org/1998/Math/MathML"><mi mathvariant="normal">b</mi><mo>=</mo><mfrac><mn>17</mn><mn>171
@@ -240,7 +240,7 @@ class qtype_multianswerwiris_test_helper extends question_test_helper {
         <property name="lang">en</property><property name="precision">4</property><property name="quizzes_question_options">
         true</property><property name="save_settings_in_cookies">false</property><property name="times_operator">·</property>
         <property name="use_degrees">false</property></properties><session version="3.0" lang="en">
-        <task><title><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>Sheet 1</mtext></math></title><group><command><input>
+        <task><title><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>Sheet 1</mtext></math></title><group><command><input>
         <math xmlns="http://www.w3.org/1998/Math/MathML"><mi mathvariant="normal">a</mi><mo>=</mo><mo>-</mo><mn>10</mn></math>
         </input><output><math xmlns="http://www.w3.org/1998/Math/MathML"><mo>-</mo><mn>10</mn></math></output></command><command>
         <input><math xmlns="http://www.w3.org/1998/Math/MathML"><mi mathvariant="normal">b</mi><mo>=</mo><mfrac><mn>17</mn>
