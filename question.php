@@ -120,11 +120,16 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
 
             $builder = com_wiris_quizzes_api_Quizzes::getInstance();
             $wrap = com_wiris_system_CallWrapper::getInstance();
-            $q = $this->wirisquestion;
-
+            
             // Build the list of grading assertions.
             $assertions = array();
             $wrap->start();
+            
+            $q = $builder->readQuestion($this->wirisquestion->serialize());
+            // $q = $this->wirisquestion;
+
+            print_object($this->wirisquestion->serialize());
+            // print_object($this->subquestions);
             $qimpl = $q->question->getImpl();
 
             // The following if is only for backwards compatibility: some old
@@ -179,7 +184,7 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                 $studentanswers[] = $subresp['answer'];
             }
             // Get question instance with the variables!
-            $qi = $this->wirisquestioninstance;
+            $qi = $builder->readQuestionInstance($this->wirisquestioninstance->serialize(), $q);
 
             // Call service.
             for ($i = 0; $i < count($studentanswers); $i++) {
@@ -188,6 +193,8 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
             for ($i = 0; $i < count($teacheranswers); $i++) {
                 $q->setCorrectAnswer($i, $teacheranswers[$i]);
             }
+
+            print_object($teacheranswers);
             $request = $builder->newFeedbackRequest($this->join_feedback_text(), $qi);
             $resp = $this->call_wiris_service($request);
             $qi->update($resp);
