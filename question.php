@@ -126,10 +126,7 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
             $wrap->start();
             
             $q = $builder->readQuestion($this->wirisquestion->serialize());
-            // $q = $this->wirisquestion;
 
-            print_object($this->wirisquestion->serialize());
-            // print_object($this->subquestions);
             $qimpl = $q->question->getImpl();
 
             // The following if is only for backwards compatibility: some old
@@ -194,7 +191,6 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                 $q->setCorrectAnswer($i, $teacheranswers[$i]);
             }
 
-            print_object($teacheranswers);
             $request = $builder->newFeedbackRequest($this->join_feedback_text(), $qi);
             $resp = $this->call_wiris_service($request);
             $qi->update($resp);

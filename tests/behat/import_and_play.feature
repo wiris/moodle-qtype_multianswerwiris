@@ -1,4 +1,4 @@
-@qtype @qtype_multianswerwiris @qtype_multianswerwiris_play
+@qtype @qtype_wq @qtype_multianswerwiris @qtype_multianswerwiris_play
 Feature: Test importing and editing multianswerwiris questions
   As a teacher
   In order to reuse and editing multianswerwiris questions
