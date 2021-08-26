@@ -268,6 +268,34 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
         return $result;
     }
 
+    public function get_question_summary() {
+        $text = $this->html_to_text($this->questiontext, $this->questiontextformat);
+        
+        foreach ($this->subquestions as $i => $subq) {
+            switch ($subq->qtype->name()) {
+                case 'multichoice':
+                case 'multichoicewiris':
+                    $choices = array();
+                    $dummyqa = new question_attempt($subq, $this->contextid);
+                    foreach ($subq->get_order($dummyqa) as $ansid) {
+                        $choices[] = $this->html_to_text($subq->answers[$ansid]->answer,
+                                $subq->answers[$ansid]->answerformat);
+                    }
+                    $answerbit = '{' . implode('; ', $choices) . '}';
+                    break;
+                case 'numerical':
+                case 'shortanswer':
+                case 'shortanswerwiris':
+                    $answerbit = '_____';
+                    break;
+                default:
+                    $answerbit = '{ERR unknown sub-question type}';
+            }
+            $text = str_replace('{#' . $i . '}', $answerbit, $text);
+        }
+        return $this->expand_variables_text($text);
+    }
+
     public function get_num_parts_right(array $response) {
         $this->set_shortanswer_matching_answers($response);
         // Use wiris subquestion types in base question.
@@ -320,7 +348,6 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
         }
         return $text;
     }
-
 
     /**
      *
