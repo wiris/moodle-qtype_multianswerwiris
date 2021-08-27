@@ -1,5 +1,5 @@
 @qtype @qtype_wq @qtype_multianswerwiris @qtype_multianswerwiris_play
-Feature: Test importing and editing multianswerwiris questions
+Feature: Test importing and answering multianswerwiris questions
   As a teacher
   In order to reuse and editing multianswerwiris questions
   I need to import them and then edit them

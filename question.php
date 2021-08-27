@@ -119,13 +119,13 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
             }
 
             $builder = com_wiris_quizzes_api_Quizzes::getInstance();
+            $q = $builder->readQuestion($this->wirisquestion->serialize());
+
             $wrap = com_wiris_system_CallWrapper::getInstance();
 
             // Build the list of grading assertions.
             $assertions = array();
             $wrap->start();
-
-            $q = $builder->readQuestion($this->wirisquestion->serialize());
 
             $qimpl = $q->question->getImpl();
 
