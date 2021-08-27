@@ -270,7 +270,6 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
 
     public function get_question_summary() {
         $text = $this->html_to_text($this->questiontext, $this->questiontextformat);
-        
         foreach ($this->subquestions as $i => $subq) {
             switch ($subq->qtype->name()) {
                 case 'multichoice':
