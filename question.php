@@ -119,12 +119,14 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
             }
 
             $builder = com_wiris_quizzes_api_Quizzes::getInstance();
+            $q = $builder->readQuestion($this->wirisquestion->serialize());
+
             $wrap = com_wiris_system_CallWrapper::getInstance();
-            $q = $this->wirisquestion;
 
             // Build the list of grading assertions.
             $assertions = array();
             $wrap->start();
+
             $qimpl = $q->question->getImpl();
 
             // The following if is only for backwards compatibility: some old
@@ -179,7 +181,7 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                 $studentanswers[] = $subresp['answer'];
             }
             // Get question instance with the variables!
-            $qi = $this->wirisquestioninstance;
+            $qi = $builder->readQuestionInstance($this->wirisquestioninstance->serialize(), $q);
 
             // Call service.
             for ($i = 0; $i < count($studentanswers); $i++) {
@@ -188,6 +190,7 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
             for ($i = 0; $i < count($teacheranswers); $i++) {
                 $q->setCorrectAnswer($i, $teacheranswers[$i]);
             }
+
             $request = $builder->newFeedbackRequest($this->join_feedback_text(), $qi);
             $resp = $this->call_wiris_service($request);
             $qi->update($resp);
@@ -265,6 +268,33 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
         return $result;
     }
 
+    public function get_question_summary() {
+        $text = $this->html_to_text($this->questiontext, $this->questiontextformat);
+        foreach ($this->subquestions as $i => $subq) {
+            switch ($subq->qtype->name()) {
+                case 'multichoice':
+                case 'multichoicewiris':
+                    $choices = array();
+                    $dummyqa = new question_attempt($subq, $this->contextid);
+                    foreach ($subq->get_order($dummyqa) as $ansid) {
+                        $choices[] = $this->html_to_text($subq->answers[$ansid]->answer,
+                                $subq->answers[$ansid]->answerformat);
+                    }
+                    $answerbit = '{' . implode('; ', $choices) . '}';
+                    break;
+                case 'numerical':
+                case 'shortanswer':
+                case 'shortanswerwiris':
+                    $answerbit = '_____';
+                    break;
+                default:
+                    $answerbit = '{ERR unknown sub-question type}';
+            }
+            $text = str_replace('{#' . $i . '}', $answerbit, $text);
+        }
+        return $this->expand_variables_text($text);
+    }
+
     public function get_num_parts_right(array $response) {
         $this->set_shortanswer_matching_answers($response);
         // Use wiris subquestion types in base question.
@@ -317,7 +347,6 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
         }
         return $text;
     }
-
 
     /**
      *
