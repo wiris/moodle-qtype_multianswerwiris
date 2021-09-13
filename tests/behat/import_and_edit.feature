@@ -1,5 +1,5 @@
-@qtype @qtype_wq @qtype_multianswerwiris @qtype_multianswerwiris_play
-Feature: Test importing and answering multianswerwiris questions
+@qtype @qtype_multianswerwiris @qtype_multianswerwiris_edit
+Feature: Test importing and editing multianswerwiris questions
   As a teacher
   In order to reuse and editing multianswerwiris questions
   I need to import them and then edit them
@@ -20,7 +20,7 @@ Feature: Test importing and answering multianswerwiris questions
     And I am on "Course 1" course homepage
 
   @javascript @_file_upload
-  Scenario: Import and execute multianswerwiris question.
+  Scenario: Import and edit multianswerwiris question.
     When I navigate to "Question bank > Import" in current page administration
     And I set the field "id_format_xml" to "1"
     And I upload "question/type/multianswerwiris/tests/fixtures/testquestion.moodle.xml" file to "Import" filemanager
@@ -29,8 +29,9 @@ Feature: Test importing and answering multianswerwiris questions
     And I should see "Importing 1 questions from file"
     And I should see "1."
     And I press "Continue"
-    Then I choose "Preview" action for "Cloze Wiris Test Question" in the question bank
-    And I switch to "questionpreview" window
-    And I click on "Fill in correct responses" "button"
-    And I click on "Submit and finish" "button"
-    Then I should see "Correct"
+    Then I choose "Edit question" action for "Cloze Wiris Test Question" in the question bank
+    And I set the following fields to these values:
+      | Question name | Edited Cloze Wiris Test Question                                                              |
+      | Question text | <p>Type -10: {:SA:=\#a}</p> <p>Type 5: {:SA:=5}</p> <p>Type 5: {:SA:=5}</p> <p>Formula #b</p> |
+    And I press "id_submitbutton"
+    And I should see "Edited Cloze Wiris Test Question"
