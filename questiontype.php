@@ -171,7 +171,7 @@ class qtype_multianswerwiris extends qtype_wq {
         // Add Wiris Quizzes question to subquestions.
         foreach ($question->subquestions as $key => $subquestion) {
             if (substr($subquestion->get_type_name(), -5) == 'wiris') {
-                $question->subquestions[$key]->wirisquestion = $question->wirisquestion;
+                $question->subquestions[$key]->wirisquestionxml = $question->wirisquestionxml;
             }
         }
         // Change wiris subquestions by moodle standard implementation in base object.
@@ -209,58 +209,28 @@ class qtype_multianswerwiris extends qtype_wq {
         if (isset($question) && $question == 0) {
             return false;
         }
-        if (isset($data['#']['wirisquestion']) && substr($data['#']['wirisquestion'][0]['#'], 0, 9) == '«session') {
-            // Moodle 1.9.
-            $text = $data['#']['wirisquestiontext'][0]['#']['text'][0]['#'];
-            $text = $this->wrsqz_adapttext($text);
-            $data['#']['questiontext'][0]['#']['text'][0]['#'] = $text;
-            $qo = $format->import_multianswer($data);
-            $qo->qtype = 'multianswerwiris';
-
-            foreach ($qo->options->questions as $key => $value) {
-                if ($value->qtype != 'numerical') {
-                    $qo->options->questions[$key]->qtype = $value->qtype . 'wiris';
-                }
+ 
+        // Moodle 2.x.
+        if (isset($data['#']['wirissubquestions'])) {
+            foreach ($data['#']['wirissubquestions']['0']['#']['wirissubquestion'] as $index => $subq) {
+                $pos = $index + 1;
+                $text = $data['#']['questiontext']['0']['#']['text']['0']['#'];
+                $replacedtext = preg_replace('~{#' . $pos . '}~', trim($subq['#']), $text);
+                $data['#']['questiontext']['0']['#']['text']['0']['#'] = $replacedtext;
             }
-
-            $wirisquestion = '<question><wirisCasSession>';
-            $mathmldecode = $this->wrsqz_mathml_decode(trim($data['#']['wirisquestion'][0]['#']));
-            $wirisquestion .= htmlspecialchars($mathmldecode, ENT_COMPAT, "UTF-8");
-            $wirisquestion .= '</wirisCasSession>';
-
-            if (isset($data['#']['wirisoptions']) && count($data['#']['wirisoptions'][0]['#']) > 0) {
-                $wirisquestion .= '<localData>';
-                $wirisquestion .= $this->wrsqz_get_cas_for_computations($data);
-                $wirisquestion .= $this->wrsqz_hidden_initial_cas_value($data);
-                $wirisquestion .= '</localData>';
-            }
-
-            $wirisquestion .= '</question>';
-            $qo->wirisquestion = $wirisquestion;
-            return $qo;
-        } else {
-            // Moodle 2.x.
-            if (isset($data['#']['wirissubquestions'])) {
-                foreach ($data['#']['wirissubquestions']['0']['#']['wirissubquestion'] as $index => $subq) {
-                    $pos = $index + 1;
-                    $text = $data['#']['questiontext']['0']['#']['text']['0']['#'];
-                    $replacedtext = preg_replace('~{#' . $pos . '}~', trim($subq['#']), $text);
-                    $data['#']['questiontext']['0']['#']['text']['0']['#'] = $replacedtext;
-                }
-            }
-
-            $qo = $format->import_multianswer($data);
-            $qo->qtype = 'multianswerwiris';
-
-            foreach ($qo->options->questions as $key => $value) {
-                if ($value->qtype != 'numerical') {
-                    $qo->options->questions[$key]->qtype = $value->qtype . 'wiris';
-                }
-            }
-
-            $qo->wirisquestion = trim($this->decode_html_entities($data['#']['wirisquestion'][0]['#']));
-            return $qo;
         }
+
+        $qo = $format->import_multianswer($data);
+        $qo->qtype = 'multianswerwiris';
+
+        foreach ($qo->options->questions as $key => $value) {
+            if ($value->qtype != 'numerical') {
+                $qo->options->questions[$key]->qtype = $value->qtype . 'wiris';
+            }
+        }
+
+        $qo->wirisquestion = trim($this->decode_html_entities($data['#']['wirisquestion'][0]['#']));
+        return $qo;
     }
 
 }

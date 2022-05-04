@@ -62,7 +62,7 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
     protected function set_wirisquestioninstance() {
         foreach ($this->subquestions as $i => $subquestion) {
             if (substr($subquestion->get_type_name(), -5) == 'wiris') {
-                $subquestion->wirisquestioninstance = $this->wirisquestioninstance;
+                $subquestion->wirisquestioninstancexml = $this->wirisquestioninstancexml;
             }
         }
     }
@@ -118,109 +118,57 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                 return;
             }
 
-            $builder = com_wiris_quizzes_api_Quizzes::getInstance();
-            $q = $builder->readQuestion($this->wirisquestion->serialize());
-
-            $wrap = com_wiris_system_CallWrapper::getInstance();
-
-            // Build the list of grading assertions.
-            $assertions = array();
-            $wrap->start();
-
-            $qimpl = $q->question->getImpl();
-
-            // The following if is only for backwards compatibility: some old
-            // multianswer assertions don't have assertions array.
-            if (empty($qimpl->assertions)) {
-                $qimpl->setAssertion("equivalent_symbolic", 0, 0);
-            }
-
-            // Since we are generating all the slots artificially by cloning the first one,
-            // set its answer field type as the default for the question.
-            $slots = $qimpl->slots;
-            if ($slots != null && isset($slots[0])) {
-                $answerfieldtype = $slots[0]->getAnswerFieldType();
-                $qimpl->setAnswerFieldType($answerfieldtype);
-            }
-
-            // Remove all non-syntactic assertions from question and save to $assertions array.
-            for ($i = $qimpl->assertions->length - 1; $i >= 0; $i--) {
-                $assertion = $qimpl->assertions[$i];
-                if (!$assertion->isSyntactic()) {
-                    $assertions[] = $assertion;
-                    $qimpl->assertions->remove($assertion);
-                }
-            }
-            $wrap->stop();
-
-            // Build request object.
-            $studentanswers = array();
-            $teacheranswers = array();
+            $slots = array();
 
             foreach ($indexes as $i) {
                 $subquestion = $this->subquestions[$i];
 
                 $substep = $this->get_substep(null, $i);
                 $subresp = $substep->filter_array($response);
-                // Call test code.
-                $subquestion->get_matching_answer_fail_test($subresp);
+
+                $slot = array();
+                $slot['authorAnswers'] = array();
 
                 // Set assertions.
                 foreach ($subquestion->answers as $answer) {
-                    foreach ($assertions as $assertion) {
-                        $newassertion = clone $assertion;
-                        $wrap->start();
-                        $newassertion->setCorrectAnswer(count($teacheranswers));
-                        $newassertion->setAnswer(count($studentanswers));
-                        $qimpl = $q->question->getImpl();
-                        $qimpl->assertions->push($newassertion);
-                        $wrap->stop();
-                    }
-                    $teacheranswers[] = $answer->answer;
+                    $slot['authorAnswers'][] = array(
+                        'value' => $answer->answer
+                    );
                 }
-                $studentanswers[] = $subresp['answer'];
-            }
-            // Get question instance with the variables!
-            $qi = $builder->readQuestionInstance($this->wirisquestioninstance->serialize(), $q);
-
-            // Call service.
-            for ($i = 0; $i < count($studentanswers); $i++) {
-                $qi->setStudentAnswer($i, $studentanswers[$i]);
-            }
-            for ($i = 0; $i < count($teacheranswers); $i++) {
-                $q->setCorrectAnswer($i, $teacheranswers[$i]);
+            
+                $slot['studentAnswer'] = $subresp['answer'];
+                $slots[] = $slot;
             }
 
-            $request = $builder->newFeedbackRequest($this->join_feedback_text(), $qi);
-            $resp = $this->call_wiris_service($request);
-            $qi->update($resp);
+            $apiresponse = $this->call_grade_service($slots);
 
             // Parse response.
             $numsubq = 0;
-            $numsubans = 0;
+            $gradedslots = $apiresponse->{'gradedSlots'};
+
             foreach ($indexes as $i) {
                 $subquestion = $this->subquestions[$i];
                 $substep = $this->get_substep(null, $i);
                 $subresp = $substep->filter_array($response);
+
                 // Compute matching answer for this subquestion.
-                $matching = null;
-                $maxgrade = 0.0;
-                foreach ($subquestion->answers as $answer) {
-                    $grade = $qi->getAnswerGrade($numsubans, $numsubq, $q);
-                    if ($grade > $maxgrade) {
-                        $maxgrade = $grade;
+                $grade = $gradedslots[$numsubq]->{'grade'};
+                $matchingauthoranswer = $gradedslots[$numsubq]->{'matchingAuthorAnswer'};
+
+                $authoranswercounter = 0;
+                foreach($subquestion->answers as $j => $answer) {
+                    if ($authoranswercounter == $matchingauthoranswer) {
                         $matching = $answer;
+                        break;
                     }
-                    if (!isset($matching) && $subquestion->compare_response_with_answer($subresp, $answer)) {
-                        $matching = $answer;
-                    }
-                    $numsubans++;
+                    ++$authoranswercounter;
                 }
+                
                 $matchinganswerid = 0;
                 if (!empty($matching)) {
                     $matchinganswerid = $matching->id;
-                    if ($maxgrade < 1.0) {
-                        $subquestion->step->set_var('_matching_answer_grade', $maxgrade, true);
+                    if ($grade < 1.0) {
+                        $subquestion->step->set_var('_matching_answer_grade', $grade, true);
                     }
                 }
                 $subresphash = md5($subresp['answer']);
@@ -228,8 +176,9 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                 $subquestion->step->set_var('_matching_answer', $matchinganswerid, true);
                 $numsubq++;
             }
+
             // Update question instance.
-            $xml = $qi->serialize();
+            $xml = $apiresponse->{'instance'};
             $this->step->set_var('_qi', $xml, true);
             $this->step->reset_attempts();
         } catch (moodle_exception $e) {
