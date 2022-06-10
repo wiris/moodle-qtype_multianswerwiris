@@ -20,7 +20,7 @@ Feature: Test creating a Multianswer Wiris (Cloze) question
   @javascript
   Scenario: Create a Cloze question
     When I am on the "Course 1" "core_question > course question bank" page logged in as teacher
-    And I press "Create a new question ..." 
+    And I press "Create a new question ..."
     And I choose the question type "Cloze - science"
     Then I set the following fields to these values:
       | Question name        | multianswer-wiris-001                    |
@@ -36,7 +36,7 @@ Feature: Test creating a Multianswer Wiris (Cloze) question
 
   @javascript
   Scenario: Create a broken Cloze question and correct it
-    When I am on the "Course 1" "core_question > course question bank" page logged in as teacher 
+    When I am on the "Course 1" "core_question > course question bank" page logged in as teacher
     And I press "Create a new question ..."
     And I choose the question type "Cloze - science"
     And I set the field "Question name" to "multianswer-wiris-002"
@@ -57,7 +57,7 @@ Feature: Test creating a Multianswer Wiris (Cloze) question
 
   Scenario: Try to create a Cloze question that has no answer
     When I am on the "Course 1" "core_question > course question bank" page logged in as teacher
-    And I press "Create a new question ..." 
+    And I press "Create a new question ..."
     And I choose the question type "Cloze - science"
     And I set the following fields to these values:
       | Question name | multianswer-wiris-003         |
@@ -68,7 +68,7 @@ Feature: Test creating a Multianswer Wiris (Cloze) question
   @javascript
   Scenario: A teacher creates true false random
     When I am on the "Course 1" "core_question > course question bank" page logged in as teacher
-    And I press "Create a new question ..." 
+    And I press "Create a new question ..."
     And I choose the question type "Cloze - science"
     And I set the following fields to these values:
       | Question name | multianswer-wiris-004                                                                                    |
