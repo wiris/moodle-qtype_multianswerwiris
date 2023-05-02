@@ -160,7 +160,7 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
                 }
             }
         }
-        $size = min(60, round($size + rand(0, $size * 0.15)));
+        $size = min(60, round($size + rand(0, (int) ($size * 0.15))));
         // The rand bit is to make guessing harder.
 
         $inputattributes = array(
