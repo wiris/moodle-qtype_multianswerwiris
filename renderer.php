@@ -70,17 +70,7 @@ class qtype_multianswerwiris_shortanswer_helper_question extends qtype_shortansw
                 // This is called to know how to render the input field (correct,
                 // partially correct, incorrect, etc).
                 if (!$this->subq->step->is_error()) {
-                    if (!is_null($this->subq->step->get_var('_matching_answer'))) {
-                        return $this->subq->get_matching_answer($response);
-                    }
-                    // This code is for retro-compatibility. The attempts graded
-                    // with previous versions of Wiris Quizzes don't have the
-                    // '_matching_answer' var but a '_fraction' var. We re-grade
-                    // such answers in order to have the new data and therefore
-                    // have the good rendering of correct/incorrect responses.
-                    if (!is_null($this->subq->step->get_var('_fraction'))) {
-                        return $this->subq->get_matching_answer($response);
-                    }
+                    return $this->subq->get_matching_answer($response);
                 }
             }
         }
@@ -93,6 +83,17 @@ class qtype_multianswerwiris_shortanswer_helper_question extends qtype_shortansw
         $correct['correct_response'] = true;
         return $correct;
     }
+    public function format_text($text, $format, $qa, $component, $filearea, $itemid, $clean = false)
+    {
+        return $this->subq->format_text($text, $format, $qa, $component, $filearea, $itemid, $clean);
+    }
+
+    public function expand_variables_text($text) {
+        if (method_exists($this->subq, 'expand_variables_text')) {
+            return $this->subq->expand_variables_text($text);
+        }
+        return $text;
+    }
 }
 
 /**
@@ -102,7 +103,6 @@ class qtype_multianswerwiris_shortanswer_helper_question extends qtype_shortansw
 class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer_subq_renderer_base {
     public function subquestion(question_attempt $qa, question_display_options $options,
             $index, question_graded_automatically $subq) {
-
         $fieldprefix = 'sub' . $index . '_';
         $fieldname = $fieldprefix . 'answer';
 
@@ -115,7 +115,6 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
         } else {
             $matchinganswer = $subq->get_matching_answer($response);
         }
-
         if (!$matchinganswer) {
             if (is_null($response) || $response === '') {
                 $matchinganswer = new question_answer(0, '', null, '', FORMAT_HTML);
@@ -163,6 +162,9 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
         $size = min(60, round($size + rand(0, (int) ($size * 0.15))));
         // The rand bit is to make guessing harder.
 
+        global $CFG;
+        $isOlderThanMoodle402 = $CFG->version < 2023042400;
+
         $inputattributes = array(
             'type' => 'text',
             'name' => $qa->get_qt_field_name($fieldname),
@@ -172,12 +174,12 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
             // Popup editor class.
             'class' => 'wirisanswerfield wirisembedded wiriscopystyle',
         );
+
         if ($options->readonly) {
             $inputattributes['class'] .= ' wirisreadonly';
             $inputattributes['readonly'] = 'readonly';
         }
 
-        $feedbackimg = '';
         if ($options->correctness) {
             $inputattributes['class'] .= ' wirisembeddedfeedback ' . $this->feedback_class($matchinganswer->fraction);
         }
@@ -188,17 +190,39 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
             $correctanswer = $subq->get_correct_answer();
         }
 
+        $subquestionclasses = 'subquestion';
+        if ($isOlderThanMoodle402) {
+            $correctanswerrender = s($correctanswer->answer);
+        } else {
+            if (method_exists($subq, 'expand_variables_text')) {
+                $correctanswerrender = $subq->expand_variables_text($correctanswer->answer);
+            }
+            if ($options->correctness) {
+                $subquestionclasses .= ' wirisnofeedbackimage';
+            }
+        }
+
         $feedbackpopup = parent::feedback_popup($subq, $matchinganswer->fraction,
                 $subq->format_text($matchinganswer->feedback, $matchinganswer->feedbackformat,
                         $qa, 'question', 'answerfeedback', $matchinganswer->id),
-                s($correctanswer->answer), $options);
+                $correctanswerrender, $options);
 
-        $output = html_writer::start_tag('span', array('class' => 'subquestion'));
+
+        $output = html_writer::start_tag('span', array('class' => $subquestionclasses));
         $output .= html_writer::tag('label', get_string('answer'),
                 array('class' => 'subq accesshide', 'for' => $inputattributes['id']));
         $output .= html_writer::empty_tag('input', $inputattributes);
-        $output .= $feedbackimg;
-        $output .= $feedbackpopup;
+
+        if ($isOlderThanMoodle402) {
+                $output .= $feedbackpopup;
+        } else {
+            // Moodle 4.2 and up.
+            if ($options->correctness) {
+                $feedbackimg = $this->feedback_image($matchinganswer->fraction);
+                $output .= $this->get_feedback_image($feedbackimg, $feedbackpopup);    
+            }
+        }
+        
         $output .= html_writer::end_tag('span');
 
         return $output;
