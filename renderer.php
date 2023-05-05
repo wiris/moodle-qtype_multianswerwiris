@@ -205,8 +205,10 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
         if ($useLegacyPopup) {
             $correctanswerrender = s($correctanswer->answer);
         } else {
-            if (method_exists($subq, 'expand_variables_text')) {
-                $correctanswerrender = $subq->expand_variables_text($correctanswer->answer);
+            if (method_exists($qa->get_question(), 'expand_variables')) {
+                $correctanswerrender = $qa->get_question()->expand_variables($correctanswer->answer);
+                $quizzes = com_wiris_quizzes_api_Quizzes::getInstance();
+                $correctanswerrender = $quizzes->getMathFilter()->filter($correctanswerrender);
             }
             if ($options->correctness) {
                 $subquestionclasses .= ' wirisnofeedbackimage';
@@ -258,10 +260,13 @@ class qtype_multianswerwiris_multichoice_inline_renderer extends qtype_multiansw
         global $CFG;
         $useLegacyPopup = $CFG->version < 2022041908 || ($CFG->version > 2022112800 && $CFG->version < 2022112803);
 
-        if (!$useLegacyPopup && method_exists($this->originalsubq, 'expand_variables_text')) {
-            $rightanswer = $this->originalsubq->expand_variables_text($rightanswer);
+        if (!$useLegacyPopup && method_exists($this->originalsubq, 'expand_variables')) {
+            $rightanswer = $this->originalsubq->expand_variables($rightanswer);
+            $quizzes = com_wiris_quizzes_api_Quizzes::getInstance();
+            $rightanswer = $quizzes->getMathFilter()->filter($rightanswer);
         }
-        
+
+  
         return parent::feedback_popup($subq, $fraction, $feedbacktext, $rightanswer, $options);
     }
 }
