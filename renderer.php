@@ -173,7 +173,7 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
         // The rand bit is to make guessing harder.
 
         global $CFG;
-        $isOlderThanMoodle402 = $CFG->version < 2023042400;
+        $useLegacyPopup = $CFG->version < 2022041908 || ($CFG->version > 2022112800 && $CFG->version < 2022112803);
 
         $inputattributes = array(
             'type' => 'text',
@@ -201,7 +201,7 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
         }
 
         $subquestionclasses = 'subquestion';
-        if ($isOlderThanMoodle402) {
+        if ($useLegacyPopup) {
             $correctanswerrender = s($correctanswer->answer);
         } else {
             if (method_exists($subq, 'expand_variables_text')) {
@@ -223,7 +223,7 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
                 array('class' => 'subq accesshide', 'for' => $inputattributes['id']));
         $output .= html_writer::empty_tag('input', $inputattributes);
 
-        if ($isOlderThanMoodle402) {
+        if ($useLegacyPopup) {
                 $output .= $feedbackpopup;
         } else {
             // Moodle 4.2 and up.
