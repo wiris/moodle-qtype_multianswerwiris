@@ -28,18 +28,19 @@ class qtype_multianswerwiris_helper_renderer extends qtype_multianswer_renderer 
     public function subquestion(question_attempt $qa, question_display_options $options, $index,
                                 $subq) {
         if ($subq->get_type_name() == 'shortanswerwiris') {
-            $subquestion = new qtype_multianswerwiris_shortanswer_helper_question($subq);
-        } else if (substr($subq->get_type_name(), -5) == 'wiris') {
-            $subquestion = $subq->base;
-        } else {
-            $subquestion = $subq;
-        }
-        if ($subq->get_type_name() == 'shortanswerwiris') {
             $renderer = $this->page->get_renderer('qtype_multianswerwiris', 'wirisanswerfield');
-            $text = $renderer->subquestion($qa, $options, $index, $subquestion);
+            $text = $renderer->subquestion($qa, $options, $index, new qtype_multianswerwiris_shortanswer_helper_question($subq));
+        } else if ($subq->get_type_name() == 'multichoicewiris') {
+            if (!$subq->base instanceof qtype_multichoice_multi_question && $subq->base->layout == qtype_multichoice_base::LAYOUT_DROPDOWN) {
+                $renderer = $this->page->get_renderer('qtype_multianswerwiris', 'multichoice_inline');
+                $text = $renderer->subquestion($qa, $options, $index, $subq);
+            } else {
+                $text = parent::subquestion($qa, $options, $index, $subq->base);
+            }
         } else {
-            $text = parent::subquestion($qa, $options, $index, $subquestion);
+            $text = parent::subquestion($qa, $options, $index, $subq);
         }
+
         $text = $qa->get_question()->format_text($text, FORMAT_HTML, $qa, 'question', 'subquestion', $subq->id);
         return $text;
     }
@@ -226,7 +227,6 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
         if ($useLegacyPopup) {
                 $output .= $feedbackpopup;
         } else {
-            // Moodle 4.2 and up.
             if ($options->correctness) {
                 $feedbackimg = $this->feedback_image($matchinganswer->fraction);
                 $output .= $this->get_feedback_image($feedbackimg, $feedbackpopup);    
@@ -240,5 +240,28 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
 
     public function feedback_class($fraction) {
         return 'wiris' . parent::feedback_class($fraction);
+    }
+}
+
+class qtype_multianswerwiris_multichoice_inline_renderer extends qtype_multianswer_multichoice_inline_renderer {
+
+    private $originalsubq;
+
+    public function subquestion(question_attempt $qa, question_display_options $options, $index, question_graded_automatically $subq)
+    {
+        $this->originalsubq = $subq;
+        return parent::subquestion($qa, $options, $index, $subq->base);
+    }
+
+    protected function feedback_popup(question_graded_automatically $subq, $fraction, $feedbacktext, $rightanswer, question_display_options $options)
+    {
+        global $CFG;
+        $useLegacyPopup = $CFG->version < 2022041908 || ($CFG->version > 2022112800 && $CFG->version < 2022112803);
+
+        if (!$useLegacyPopup && method_exists($this->originalsubq, 'expand_variables_text')) {
+            $rightanswer = $this->originalsubq->expand_variables_text($rightanswer);
+        }
+        
+        return parent::feedback_popup($subq, $fraction, $feedbacktext, $rightanswer, $options);
     }
 }
