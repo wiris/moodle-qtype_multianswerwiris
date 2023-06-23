@@ -172,10 +172,6 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
         }
         $size = min(60, round($size + rand(0, (int) ($size * 0.15))));
         // The rand bit is to make guessing harder.
-
-        global $CFG;
-        $useLegacyPopup = $CFG->version < 2022041908 || ($CFG->version > 2022112800 && $CFG->version < 2022112803);
-
         $inputattributes = array(
             'type' => 'text',
             'name' => $qa->get_qt_field_name($fieldname),
@@ -202,6 +198,9 @@ class qtype_multianswerwiris_wirisanswerfield_renderer extends qtype_multianswer
         }
 
         $subquestionclasses = 'subquestion';
+
+        $useLegacyPopup = !method_exists($this, 'get_feedback_image');
+        
         if ($useLegacyPopup) {
             $correctanswerrender = s($correctanswer->answer);
         } else {
