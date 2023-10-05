@@ -1,4 +1,4 @@
-<?php
+ <?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -177,10 +177,10 @@ class qtype_multianswerwiris extends qtype_wq {
         // Change wiris subquestions by moodle standard implementation in base object.
         foreach ($question->base->subquestions as $key => $subquestion) {
             if (isset($subquestion->base)) {
-                // Put maxmark to base. It was set up by multianswer
+                // Put defaultmark to base. It was set up by multianswer
                 // get_question_options because subquestions don't have entry
                 // to quiz_question_instance table.
-                $subquestion->base->maxmark = &$subquestion->maxmark;
+                $subquestion->base->defaultmark = &$subquestion->defaultmark;
                 $question->base->subquestions[$key] = $subquestion->base;
             }
         }
