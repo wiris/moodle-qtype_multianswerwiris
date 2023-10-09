@@ -58,7 +58,7 @@ class qtype_multianswerwiris_shortanswer_helper_question extends qtype_shortansw
 
         $this->qtype = &$this->subq->base->qtype; // Base shortanswer qtype.
 
-        $this->maxmark = &$this->subq->maxmark;
+        $this->defaultmark = &$this->subq->defaultmark;
         $this->answers = &$this->subq->answers;
     }
     // Shortanswerwiris grading.
