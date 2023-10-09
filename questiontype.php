@@ -1,4 +1,4 @@
- <?php
+<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -165,6 +165,7 @@ class qtype_multianswerwiris extends qtype_wq {
     }
 
     public function initialise_question_instance(question_definition $question, $questiondata) {
+        global $CFG;
         parent::initialise_question_instance($question, $questiondata);
 
         $question->subquestions = $question->base->subquestions;
@@ -180,7 +181,12 @@ class qtype_multianswerwiris extends qtype_wq {
                 // Put defaultmark to base. It was set up by multianswer
                 // get_question_options because subquestions don't have entry
                 // to quiz_question_instance table.
-                $subquestion->base->defaultmark = &$subquestion->defaultmark;
+
+                if ($CFG->version >= 2023042402 /* v4.2.2 */) {
+                    $subquestion->base->defaultmark = &$subquestion->defaultmark;
+                } else {
+                    $subquestion->base->maxmark = &$subquestion->maxmark;
+                }
                 $question->base->subquestions[$key] = $subquestion->base;
             }
         }
