@@ -106,10 +106,8 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                     if (!$needsgrade) {
                         $substep = $this->get_substep(null, $i);
                         $subresp = $substep->filter_array($response);
-                        $subresphash = isset($subresp['answer']) ? md5($subresp['answer']) : null;
-                        $cachedresponses = $this->step->get_var('_response_hash') ?? '';
 
-                        if (!is_null($subresphash) && !str_contains($cachedresponses, $subresphash)) {
+                        if (isset($subresp['answer']) && !$this->step->is_answer_cached($subresp['answer'])) {
                             $needsgrade = true;
                         }
                     }
@@ -220,17 +218,19 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
                     $numsubans++;
                 }
                 $matchinganswerid = 0;
+
+                $subanswer = $subresp['answer'];
+
                 if (!empty($matching)) {
                     $matchinganswerid = $matching->id;
                     if ($maxgrade < 1.0) {
-                        $subquestion->step->set_var('_' . substr($subresphash, 0, 6) . '_matching_answer_grade', $maxgrade, true);
+                        $subquestion->step->set_var_in_answer_cache('_matching_answer_grade', $maxgrade, $subanswer);
                     }
                 }
-                $subresphash = md5($subresp['answer']);
 
-                $cached = $subquestion->step->get_var('_response_hash') ?? '';
-                $subquestion->step->set_var('_response_hash', $cached ? $cached . ',' . $subresphash : $subresphash, true);
-                $subquestion->step->set_var('_' . substr($subresphash, 0, 6) . '_matching_answer', $matchinganswerid, true);
+                $subquestion->step->set_var_in_answer_cache('_matching_answer', $matchinganswerid, $subanswer);
+                $subquestion->step->set_var('_matching_answer', '0');
+
                 $subquestion->step->reset_attempts();
                 $numsubq++;
             }

@@ -82,8 +82,11 @@ class qtype_multianswerwiris_shortanswer_helper_question extends qtype_shortansw
                 // partially correct, incorrect, etc).
 
                 if (!is_null($response['answer'])) {
-                    $responsehash = md5($response['answer']);
-                    if (!is_null($this->subq->step->get_var('_' . substr($responsehash, 0, 6) . '_matching_answer'))) {
+                    $matchinganswer = $this->subq->step->get_var_in_answer_cache(
+                        '_matching_answer',
+                        $response['answer']
+                    );
+                    if (!is_null($matchinganswer)) {
                         return $this->subq->get_matching_answer($response);
                     }
                 }
