@@ -148,7 +148,13 @@ class qtype_multianswerwiris extends qtype_wq {
             $question->id = $authorizedquestion->id;
         }
 
-        $question->category = $authorizedquestion->category;
+        global $CFG;
+        if ($CFG->version >= 2022041900 /* Moodle 4.0.0 */) {
+            $question->category = $form->category;
+        } else {
+            $question->category = $authorizedquestion->category;
+        }
+
         $form->defaultmark = $question->defaultmark;
         $form->questiontext = $question->questiontext;
         $form->questiontextformat = 0;
