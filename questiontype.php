@@ -160,7 +160,7 @@ class qtype_multianswerwiris extends qtype_wq {
     public function create_editing_form($submiturl, $question, $category, $contexts, $formeditable) {
         global $CFG;
         require_once($CFG->dirroot . '/question/type/multianswerwiris/edit_multianswerwiris_form.php');
-        $wform = new qtype_multianswer_edit_form_helper($submiturl, $question, $category, $contexts, $formeditable);
+        $wform = $this->base->create_editing_form($submiturl, $question, $category, $contexts, $formeditable);
         return new qtype_multianswerwiris_edit_form($wform, $submiturl, $question, $category, $contexts, $formeditable);
     }
 
