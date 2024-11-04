@@ -51,10 +51,12 @@ class qtype_multianswer_edit_form_helper extends qtype_multianswer_edit_form {
     protected function definition_inner($mform) {
         // Remove wiris particle from subquestion qtypes so the multianswer form does not think
         // we are changing the qtypes when we are not actually doing it.
-        foreach ($this->savedquestiondisplay->options->questions as $subq) {
-            $qtype = $subq->qtype;
-            if (substr($qtype, -5) == 'wiris') {
-                $subq->qtype = substr($qtype, 0, strlen($qtype) - 5);
+        if (isset($this->savedquestiondisplay)) {
+            foreach ($this->savedquestiondisplay->options->questions as $subq) {
+                $qtype = $subq->qtype;
+                if (substr($qtype, -5) == 'wiris') {
+                    $subq->qtype = substr($qtype, 0, strlen($qtype) - 5);
+                }
             }
         }
 

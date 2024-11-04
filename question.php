@@ -240,7 +240,7 @@ class qtype_multianswerwiris_question extends qtype_wq_question implements quest
             $this->step->reset_attempts();
         } catch (moodle_exception $e) {
             // Notify of the error.
-            $this->step->inc_attempts();
+            $this->step->inc_attempts($e);
             throw $e;
         }
     }
