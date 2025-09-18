@@ -1,4 +1,4 @@
-@javascript @qtype_multianswerwiris @studentwiris 
+@javascript @qtype_multianswerwiris @studentwiris @wqmdl-269
 Feature: Student answers a quiz with an Embedded answers (Cloze) (WIRIS) question
     #The quiz creation seems not to be working correctly. Needs to be rechecked
 
