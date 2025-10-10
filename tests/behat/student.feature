@@ -29,7 +29,7 @@ Feature: Student answers a quiz with an Embedded answers (Cloze) (WIRIS) questio
     # For Cloze, the structure lives in questiontext
     And the following "questions" exist:
         | questioncategory | qtype             | name                 | questiontext                                                         | defaultmark |
-        | WIRIS bank       | multianswerwiris  | Cloze WIRIS| <p>The symbol for the speed of light is {1:SHORTANSWER:=c}.</p>     | 1.0         |
+        | WIRIS bank       | multianswer  | Cloze WIRIS| <p>The symbol for the speed of light is {1:SHORTANSWER:=c}.</p>     | 1.0         |
 
     And quiz "WIRIS Cloze Quiz" contains the following questions:
         | question              | page |
