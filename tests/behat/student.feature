@@ -9,6 +9,11 @@ Feature: Student answers a quiz with an Embedded answers (Cloze) (WIRIS) questio
     And the following "courses" exist:
         | fullname | shortname |
         | Course 1 | C1        |
+
+    # Clear any existing WIRIS data that might cause conflicts
+    And I run the scheduled task "core\task\cache_cleanup_task"
+
+
     And the following "course enrolments" exist:
         | user     | course | role    |
         | student1 | C1     | student |
