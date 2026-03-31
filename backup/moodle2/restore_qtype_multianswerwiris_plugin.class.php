@@ -92,7 +92,11 @@ class restore_qtype_multianswerwiris_plugin extends restore_qtype_multianswer_pl
     }
 
     public function after_execute_question() {
-        return;
+        // Delegate to the parent multianswer implementation which remaps the
+        // question_multianswer.sequence from old backup IDs to new restored IDs.
+        // Without this, restored multianswerwiris questions would reference
+        // non-existent subquestion IDs, causing missing subquestions.
+        parent::after_execute_question();
     }
 
     protected function decode_html_entities($xml) {
