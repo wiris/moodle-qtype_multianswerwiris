@@ -91,12 +91,88 @@ class restore_qtype_multianswerwiris_plugin extends restore_qtype_multianswer_pl
         }
     }
 
+    /**
+     * This method is executed once the whole restore_structure_step
+     * this step is part of ({@link restore_create_categories_and_questions})
+     * has ended processing the whole xml structure. Its name is:
+     * "after_execute_" + connectionpoint ("question")
+     *
+     * For multianswerwiris qtype we use it to restore the sequence column in
+     * {question_multianswer}, which contains the list of subquestion IDs.
+     *
+     * --- Why this override exists ---
+     * The parent implementation ({@see restore_qtype_multianswer_plugin::after_execute_question()})
+     * queries ALL question_multianswer records regardless of qtype. When a backup contains
+     * both native 'multianswer' and 'multianswerwiris' questions, both plugins run their
+     * after_execute_question() in sequence. Without this override, the parent would run
+     * twice: once via the native multianswer plugin (correct) and once via this class
+     * (corrupt), mapping already-remapped IDs through the backup→restore mapping table
+     * a second time and producing null IDs, which empties the sequence and causes all
+     * embedded answer fields to disappear after restore.
+     *
+     * --- Strategy ---
+     * 1. Scope the query to 'multianswerwiris' parent questions only, so native
+     *    'multianswer' records are not touched by this plugin.
+     * 2. Apply an idempotency guard: skip any record whose sequence IDs have already
+     *    been remapped to new IDs by the native multianswer plugin. This makes the
+     *    method safe whether the native plugin ran first or not (e.g. backups that
+     *    contain only multianswerwiris questions and no native multianswer ones).
+     *
+     * @see restore_qtype_multianswer_plugin::after_execute_question()
+     * @link https://github.com/wiris/moodle-qtype_multianswerwiris/issues/XX
+     */
     public function after_execute_question() {
-        // Delegate to the parent multianswer implementation which remaps the
-        // question_multianswer.sequence from old backup IDs to new restored IDs.
-        // Without this, restored multianswerwiris questions would reference
-        // non-existent subquestion IDs, causing missing subquestions.
-        parent::after_execute_question();
+        global $DB;
+
+        // Fetch only question_multianswer records whose parent question is a
+        // multianswerwiris type and was newly created (not mapped to an existing one)
+        // during this restore session.
+        $rs = $DB->get_recordset_sql("
+                SELECT qma.id, qma.sequence
+                FROM {question_multianswer} qma
+                JOIN {backup_ids_temp} bi ON bi.newitemid = qma.question
+                JOIN {question} q ON q.id = qma.question
+                WHERE bi.backupid = :backupid
+                AND bi.itemname = 'question_created'
+                AND q.qtype = 'multianswerwiris'",
+                ['backupid' => $this->get_restoreid()]);
+
+        foreach ($rs as $rec) {
+            $subquestionids = preg_split('/,/', $rec->sequence, -1, PREG_SPLIT_NO_EMPTY);
+
+            // Idempotency guard: if none of the IDs in the sequence resolve to a
+            // backup→restore mapping, they have already been remapped to new IDs
+            // by the native multianswer plugin. Skip to avoid a destructive second pass.
+            $hasunmappedids = false;
+            foreach ($subquestionids as $subquestionid) {
+                if ($this->get_mappingid('question', $subquestionid)) {
+                    $hasunmappedids = true;
+                    break;
+                }
+            }
+            if (!$hasunmappedids) {
+                continue;
+            }
+
+            // Remap each subquestion ID from the old backup ID to the new restored ID.
+            // IDs that have no mapping are dropped via array_filter (should not happen
+            // in a healthy backup, but mirrors the behaviour of the parent class).
+            foreach ($subquestionids as $key => $subquestionid) {
+                $newid = $this->get_mappingid('question', $subquestionid);
+                if ($newid) {
+                    $subquestionids[$key] = $newid;
+                }
+            }
+
+            $DB->set_field(
+                'question_multianswer',
+                'sequence',
+                implode(',', array_filter($subquestionids)),
+                ['id' => $rec->id]
+            );
+        }
+
+        $rs->close();
     }
 
     protected function decode_html_entities($xml) {
