@@ -119,7 +119,6 @@ class restore_qtype_multianswerwiris_plugin extends restore_qtype_multianswer_pl
      *    contain only multianswerwiris questions and no native multianswer ones).
      *
      * @see restore_qtype_multianswer_plugin::after_execute_question()
-     * @link https://github.com/wiris/moodle-qtype_multianswerwiris/issues/XX
      */
     public function after_execute_question() {
         global $DB;
