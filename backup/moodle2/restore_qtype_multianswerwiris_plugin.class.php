@@ -92,86 +92,84 @@ class restore_qtype_multianswerwiris_plugin extends restore_qtype_multianswer_pl
     }
 
     /**
-     * This method is executed once the whole restore_structure_step
-     * this step is part of ({@link restore_create_categories_and_questions})
-     * has ended processing the whole xml structure. Its name is:
-     * "after_execute_" + connectionpoint ("question")
+     * Remaps subquestion IDs in question_multianswer.sequence after restore.
      *
-     * For multianswerwiris qtype we use it to restore the sequence column in
-     * {question_multianswer}, which contains the list of subquestion IDs.
+     * Overrides the parent to scope processing to 'multianswerwiris' records only.
+     * Without this, when a backup contains both native multianswer and multianswerwiris
+     * questions, the parent's unscoped query would run twice and corrupt the sequences
+     * (already-remapped IDs would pass through get_mappingid() as nulls, emptying the
+     * sequence and making all embedded answer fields disappear).
      *
-     * --- Why this override exists ---
-     * The parent implementation ({@see restore_qtype_multianswer_plugin::after_execute_question()})
-     * queries ALL question_multianswer records regardless of qtype. When a backup contains
-     * both native 'multianswer' and 'multianswerwiris' questions, both plugins run their
-     * after_execute_question() in sequence. Without this override, the parent would run
-     * twice: once via the native multianswer plugin (correct) and once via this class
-     * (corrupt), mapping already-remapped IDs through the backup→restore mapping table
-     * a second time and producing null IDs, which empties the sequence and causes all
-     * embedded answer fields to disappear after restore.
-     *
-     * --- Strategy ---
-     * 1. Scope the query to 'multianswerwiris' parent questions only, so native
-     *    'multianswer' records are not touched by this plugin.
-     * 2. Apply an idempotency guard: skip any record whose sequence IDs have already
-     *    been remapped to new IDs by the native multianswer plugin. This makes the
-     *    method safe whether the native plugin ran first or not (e.g. backups that
-     *    contain only multianswerwiris questions and no native multianswer ones).
+     * Assumes Moodle runs the native multianswer plugin first (guaranteed by backup
+     * ordering). The native plugin has no qtype filter, so it must run before this one.
      *
      * @see restore_qtype_multianswer_plugin::after_execute_question()
      */
     public function after_execute_question() {
         global $DB;
 
-        // Fetch only question_multianswer records whose parent question is a
-        // multianswerwiris type and was newly created (not mapped to an existing one)
-        // during this restore session.
         $rs = $DB->get_recordset_sql("
                 SELECT qma.id, qma.sequence
-                FROM {question_multianswer} qma
-                JOIN {backup_ids_temp} bi ON bi.newitemid = qma.question
-                JOIN {question} q ON q.id = qma.question
-                WHERE bi.backupid = :backupid
-                AND bi.itemname = 'question_created'
-                AND q.qtype = 'multianswerwiris'",
+                  FROM {question_multianswer} qma
+                  JOIN {backup_ids_temp} bi ON bi.newitemid = qma.question
+                  JOIN {question} q ON q.id = qma.question
+                 WHERE bi.backupid = :backupid
+                   AND bi.itemname = 'question_created'
+                   AND q.qtype = 'multianswerwiris'",
                 ['backupid' => $this->get_restoreid()]);
 
         foreach ($rs as $rec) {
-            $subquestionids = preg_split('/,/', $rec->sequence, -1, PREG_SPLIT_NO_EMPTY);
-
-            // Idempotency guard: if none of the IDs in the sequence resolve to a
-            // backup→restore mapping, they have already been remapped to new IDs
-            // by the native multianswer plugin. Skip to avoid a destructive second pass.
-            $hasunmappedids = false;
-            foreach ($subquestionids as $subquestionid) {
-                if ($this->get_mappingid('question', $subquestionid)) {
-                    $hasunmappedids = true;
-                    break;
-                }
+            $sequence = $this->remap_sequence($rec->sequence);
+            if ($sequence === null) {
+                continue; // Already processed by the native multianswer plugin.
             }
-            if (!$hasunmappedids) {
-                continue;
-            }
-
-            // Remap each subquestion ID from the old backup ID to the new restored ID.
-            // IDs that have no mapping are dropped via array_filter (should not happen
-            // in a healthy backup, but mirrors the behaviour of the parent class).
-            foreach ($subquestionids as $key => $subquestionid) {
-                $newid = $this->get_mappingid('question', $subquestionid);
-                if ($newid) {
-                    $subquestionids[$key] = $newid;
-                }
-            }
-
-            $DB->set_field(
-                'question_multianswer',
-                'sequence',
-                implode(',', array_filter($subquestionids)),
-                ['id' => $rec->id]
-            );
+            $DB->set_field('question_multianswer', 'sequence', $sequence, ['id' => $rec->id]);
+            $this->fix_multichoice_shuffle($sequence);
         }
 
         $rs->close();
+    }
+
+    /**
+     * Maps old backup subquestion IDs to new restored IDs for a sequence string.
+     *
+     * Returns null if no ID in the sequence has a backup→restore mapping, which means
+     * the native multianswer plugin has already processed this record.
+     */
+    private function remap_sequence(string $sequence): ?string {
+        $ids = preg_split('/,/', $sequence, -1, PREG_SPLIT_NO_EMPTY);
+        $remapped = array_filter(array_map(
+            fn($id) => $this->get_mappingid('question', $id),
+            $ids
+        ));
+        return !empty($remapped) ? implode(',', $remapped) : null;
+    }
+
+    /**
+     * Resets shuffleanswers to 0 on any multichoice subquestion in the sequence.
+     *
+     * Mirrors restore_qtype_multianswer_plugin::after_execute_question(). Multichoice
+     * answers embedded in a cloze question must not be shuffled because their order is
+     * determined by the question text syntax ({1:MC:=A~B~C}).
+     */
+    private function fix_multichoice_shuffle(string $sequence): void {
+        global $DB;
+
+        $subquestions = $DB->get_records_list('question', 'id', explode(',', $sequence), 'id ASC');
+        foreach ($subquestions as $sub) {
+            if ($sub->qtype !== 'multichoice') {
+                continue;
+            }
+            question_bank::get_qtype('multichoice')->get_question_options($sub);
+            if (!isset($sub->options->shuffleanswers)) {
+                continue;
+            }
+            preg_match('/' . ANSWER_REGEX . '/s', $sub->questiontext, $match);
+            if (!empty($match[ANSWER_REGEX_ANSWER_TYPE_MULTICHOICE])) {
+                $DB->set_field('qtype_multichoice_options', 'shuffleanswers', 0,
+                    ['id' => $sub->options->id]);
+            }
+        }
     }
 
     protected function decode_html_entities($xml) {
