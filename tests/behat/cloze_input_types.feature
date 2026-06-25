@@ -50,7 +50,7 @@ Feature: Embedded answers (Cloze) (WIRIS) sub-question input options
         And the following "activities" exist:
             | activity | name            | course | idnumber | grade |
             | quiz     | Cloze Fill Quiz | C1     | clozeq1  | 2     |
-        And quiz "Cloze Fill Quiz" contains the following questions:
+        And quiz "Cloze Fill Quiz" contains the following Wiris questions:
             | question   | page |
             | Cloze fill | 1    |
         When I am on the "Cloze Fill Quiz" "mod_quiz > View" page logged in as "student1"
@@ -76,7 +76,7 @@ Feature: Embedded answers (Cloze) (WIRIS) sub-question input options
         And the following "activities" exist:
             | activity | name             | course | idnumber | grade |
             | quiz     | Cloze Radio Quiz | C1     | clozeq2  | 1     |
-        And quiz "Cloze Radio Quiz" contains the following questions:
+        And quiz "Cloze Radio Quiz" contains the following Wiris questions:
             | question    | page |
             | Cloze radio | 1    |
         When I am on the "Cloze Radio Quiz" "mod_quiz > View" page logged in as "student1"
@@ -100,7 +100,7 @@ Feature: Embedded answers (Cloze) (WIRIS) sub-question input options
         And the following "activities" exist:
             | activity | name                | course | idnumber | grade |
             | quiz     | Cloze Checkbox Quiz | C1     | clozeq3  | 3     |
-        And quiz "Cloze Checkbox Quiz" contains the following questions:
+        And quiz "Cloze Checkbox Quiz" contains the following Wiris questions:
             | question       | page |
             | Cloze checkbox | 1    |
         When I am on the "Cloze Checkbox Quiz" "mod_quiz > View" page logged in as "student1"
