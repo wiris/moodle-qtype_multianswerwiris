@@ -1,4 +1,4 @@
-@qtype_multianswerwiris @wq @javascript @student @attempt @inputoptions @regression
+@qtype @qtype_multianswerwiris @wq @javascript @student @attempt @inputoptions @regression
 Feature: Embedded answers (Cloze) (WIRIS) sub-question input options
     In order to trust every Embedded answers (Cloze) (WIRIS) sub-question type
     As a student

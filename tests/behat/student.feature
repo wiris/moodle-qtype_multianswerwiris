@@ -1,4 +1,4 @@
-@qtype_multianswerwiris @wq @javascript @student @attempt @regression
+@qtype @qtype_multianswerwiris @wq @javascript @student @attempt @regression
 Feature: Student answers a quiz with an Embedded answers (Cloze) (WIRIS) question
 
     Background:
