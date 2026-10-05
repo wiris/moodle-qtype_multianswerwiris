@@ -30,8 +30,10 @@ Feature: Student answers a quiz with an Embedded answers (Cloze) (WIRIS) questio
     Scenario: Student attempts and submits the Cloze (WIRIS) quiz
         Given I am on the "WIRIS Cloze Quiz" "mod_quiz > View" page logged in as "student1"
         When I press "Attempt quiz"
-        # The embedded answer has no usable label, so target the input inside the question.
-        And I set the field with xpath "//div[contains(@class,'formulation')]//input[@type='text']" to "c"
+        # WIRIS hides the original Moodle input and adds its own editable field.
+        And I wait until ".wirisanswerfield.wirisembedded.wirisprocessed:not(.wiriserrorprocessing)" "css_element" exists
+        And I wait until ".wrsUI_quizzesEmbeddedAnswerField .wrsUI_textField > input" "css_element" exists
+        And I set the field with xpath "//div[contains(@class,'formulation')]//div[contains(@class,'wrsUI_textField')]/input[@type='text']" to "c"
         And I click on "Finish attempt ..." "link"
         And I press "Submit all and finish"
         And I click on "Submit all and finish" "button" in the "Submit all your answers and finish?" "dialogue"
