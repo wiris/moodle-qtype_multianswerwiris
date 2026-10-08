@@ -10,14 +10,12 @@ Feature: Embedded answers (Cloze) (WIRIS) sub-question input options
     # MULTICHOICE / MULTIRESPONSE -> multichoicewiris, while NUMERICAL stays a plain
     # numerical blank.
     #
-    # The wrapped SHORTANSWER blank is rendered as a MathType field
-    # (class "wirisembedded wirisprocessed"), so - like the standalone equation
-    # input - it cannot be driven from the keyboard and is only checked for render.
-    # NUMERICAL is a plain text box and every MULTICHOICE / MULTIRESPONSE control
-    # (dropdown, radio, checkbox) is a standard Moodle control, so those are
-    # exercised end to end (filled and graded).
+    # SHORTANSWER uses a generated WIRIS text field. The numerical, dropdown and
+    # radio scenarios fill native Moodle controls and check their grades. The
+    # combined SHORTANSWER / checkbox scenario checks readiness, enters answers
+    # and completes the attempt.
     #
-    # Cloze sub-inputs are addressed by their field-name suffix: text, dropdown and
+    # Native Cloze sub-inputs are addressed by their field-name suffix: numerical, dropdown and
     # radio blanks use sub<index>_answer (the radio id additionally carries the
     # 0-based choice value); checkbox (multiresponse) blanks use sub<index>_choice.
     # The blank <index> is its 1-based position in the text. MULTICHOICE_H / _S and
@@ -90,10 +88,8 @@ Feature: Embedded answers (Cloze) (WIRIS) sub-question input options
         And I should see "Student One"
         And I should see "1.00"
 
-    Scenario: Short answer (WIRIS) and checkbox cloze blanks render and the attempt completes
-        # The wrapped SHORTANSWER blank is a MathType overlay (not keyboard
-        # fillable, grading is PHPUnit scope) and MULTIRESPONSE renders checkboxes.
-        # Both are checked for render and that an attempt over them can be finished.
+    Scenario: Short answer (WIRIS) and checkbox cloze blanks accept answers and the attempt completes
+        # Embedded SHORTANSWER uses a generated text field; MULTIRESPONSE uses native checkboxes.
         Given the following "questions" exist:
             | questioncategory | qtype            | name           | questiontext                                                                                      | defaultmark |
             | WIRIS bank       | multianswerwiris | Cloze checkbox | <p>Symbol for the speed of light: {1:SHORTANSWER:=c}. Pick the primes: {2:MULTIRESPONSE:=2~=3~5}.</p> | 3           |
@@ -105,9 +101,13 @@ Feature: Embedded answers (Cloze) (WIRIS) sub-question input options
             | Cloze checkbox | 1    |
         When I am on the "Cloze Checkbox Quiz" "mod_quiz > View" page logged in as "student1"
         And I press "Attempt quiz"
-        # Both renderings appear on the attempt page.
+        And I wait until the WIRIS answer fields are ready
         Then I should see "Symbol for the speed of light:"
         And I should see "Pick the primes:"
+        And I should see "3" elements matching ".que.multianswerwiris input[type='checkbox']"
+        And I set the field with xpath "//div[contains(@class,'formulation')]//div[contains(@class,'wrsUI_textField')]/input[@type='text']" to "c"
+        And I click on "//input[@type='checkbox' and contains(@id, 'sub2_choice0')]" "xpath_element"
+        And I click on "//input[@type='checkbox' and contains(@id, 'sub2_choice1')]" "xpath_element"
         And I click on "Finish attempt ..." "link"
         And I press "Submit all and finish"
         And I click on "Submit all and finish" "button" in the "Submit all your answers and finish?" "dialogue"
